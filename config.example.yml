@@ -1,0 +1,33 @@
+timezone: UTC
+
+github:
+  user_name: Fantasy Task Scheduler
+  user_email: fantasy-task-scheduler@example.com
+
+leagues:
+  - name: redraft-league
+    league_id: "123456789"
+
+    exporter:
+      # Example: run the exporter project checked out in /work/SleeperLeagueExporter
+      command: "python -m sleeperleagueexporter --league-id {league_id} --output /data/{league_id}"
+      working_dir: /work/SleeperLeagueExporter
+
+    push:
+      enabled: true
+      repo_path: /data/fantasy-data-repo
+      branch: main
+      commit_message: "Refresh Sleeper data for {league_name} at {timestamp}"
+
+    ai:
+      working_dir: /data/fantasy-data-repo
+      commands:
+        - "python /app/scripts/run_agents.py --league {league_id} --data /data/{league_id}"
+
+    jobs:
+      - name: refresh
+        action: refresh_and_push
+        cron: "0 */6 * * *"
+      - name: ai-processing
+        action: run_ai_agents
+        cron: "30 */6 * * *"
